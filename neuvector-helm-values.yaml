@@ -1,3 +1,4 @@
+### values file to use when upgrading neuvector with helm: 30001=NVmanager, 30002=NVmanaged, 30003=webui, 30004=? 
 controller:
   federation:
 #    mastersvc:
