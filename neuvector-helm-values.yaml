@@ -1,0 +1,54 @@
+controller:
+  federation:
+    managedsvc:
+      ports:
+      - nodePort: 30002
+        port: 10443
+        targetPort: 10443
+      type: NodePort
+  ranchersso:
+    enabled: true
+  replicas: 1
+cve:
+  scanner:
+    replicas: 1
+global:
+  cattle:
+    url: https://rancher-demo.susealliances.com                            ### Update, as needed
+  fleet:
+    clusterLabels:
+      management.cattle.io/cluster-display-name: neuvector-test-cluster    ### Update, as needed
+      management.cattle.io/cluster-name: c-m-jztw44wn                      ### Update, as needed
+      provider.cattle.io: rke2                                             ### Update, as needed
+      status: standby
+k3s:
+  enabled: true
+manager:
+  svc:
+    type: NodePort
+    ports:
+      - name: manager
+        nodePort: 30003
+        port: 8443
+        protocol: TCP
+        targetPort: 8443
+registry: docker.io
+tag: 5.1.0
+
+# helm ls -A  # Find the chart and namespace of the target application
+# NAMESPACE="cattle-neuvector-system"
+# APP="neuvector"
+# helm get values -n ${NAMESPACE} ${APP}  # Redirect into a file to get the deployed values fle (i.e. the basis for the yaml file above)
+# helm search repo neuvector/core --versions
+# CHART_VERSION="2.4.1" # <chart version, not the app version>
+# helm upgrade ${APP} neuvector/core --namespace ${NAMESPACE} --version ${CHART_VERSION} --values neuvector-helm-values.yaml
+# Note that at one point the upgrade failed due to a change in annotations from neuvector-crd to neuvector.
+# Used these scripts to resolve each resource after an attempted upgrade failed:
+#
+# for EACH in $(kubectl get CustomResourceDefinition -o custom-columns=N:.metadata.name,A:.metadata.annotations |grep neuvector-crd | awk '{print$1}'); do echo ${EACH}; kubectl annotate CustomResourceDefinition ${EACH} meta.helm.sh/release-name=neuvector --overwrite; done
+#
+# for EACH in $(kubectl get clusterrole -o custom-columns=N:.metadata.name,A:.metadata.annotations |grep neuvector-crd | awk '{print$1}'); do echo ${EACH}; kubectl annotate clusterrole ${EACH} meta.helm.sh/release-name=neuvector --overwrite; done
+#
+# for EACH in $(kubectl get clusterrolebinding -o custom-columns=N:.metadata.name,A:.metadata.annotations |grep neuvector-crd | awk '{print$1}'); do echo ${EACH}; kubectl annotate clusterrolebinding ${EACH} meta.helm.sh/release-name=neuvector --overwrite; done
+#
+# for EACH in $(kubectl get service -n cattle-neuvector-system -o custom-columns=N:.metadata.name,A:.metadata.annotations |grep neuvector-crd | awk '{print$1}'); do echo ${EACH}; kubectl annotate  service -n cattle-neuvector-system ${EACH} meta.helm.sh/release-name=neuvector --overwrite; done
